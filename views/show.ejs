@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <script src="public/javascripts/jquery-1.9.1.js"></script>
+    <!--<script src="public/javascripts/MIA.js"></script> -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+    <style>
+        body,h1,h2,h3,h4 {
+            font-family: "microsoft yahei";
+        }
+        ul{padding-left: 0;}
+        ul li{list-style: none;}
+        .table tbody>tr>td{line-height: 2.1;padding: 4px 8px;}
+        .label{margin-right: 5px;}
+        .glyphicon{color: #888;}
+        .label{font-weight: normal;padding-top: 0.3em;}
+        .breadcrumb {
+            padding: 4px;
+            margin-bottom: 0;
+            list-style: none;
+            background-color: transparent;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+
+        <div class="col-lg-12">
+            <blockquote style="margin-top: 10px;background: #f4f8fa;">MIA系统后台-Version1.0.1</blockquote>
+            <h1>访客信息</h1>
+            <div class="panel panel-default">
+                <div class="panel-heading">点击访客名称查看具体信息：</div>
+                <div class="panel-body">
+                    <ul>
+                        <% for(var i=0; i<result.length; i++) {%>
+                        <li>
+                            <ol class="breadcrumb">
+                                <li><%= i+1 %></li><li class="active"><a data-id="/show/<%= result[i]['info_id']%>" href="javascript:;" data-fid='<%= i+1 %>'>访客<%=
+                                i+1%></a></li><li><%= result[i]['country']||'暂缺'%></li><li><%= result[i]['area']||'暂缺'%> </li><li><%= result[i]['region']||'暂缺'%></li><li><%= result[i]['city']||'暂缺' %> </li><li><%= result[i]['ip']%> </li><li><%= result[i]['isp']||'暂缺'%> </li> <li><%= result[i]['browser']%> </li><li><%= result[i]['screen']%> </li><li><%= result[i]['os']%> </li>
+                            </ol>
+                        </li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+
+
+
+                <div id="r"></div>
+
+        </div>
+        <script>
+            $(function () {
+                $('li a').click(function () {
+                    var id = $(this).data('id');
+                    var fid=$(this).data('fid')
+                    $.get(id,{fid:fid}, function (data) {
+                        $('#r').html('').html(data);
+                    })
+                })
+            })
+        </script>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+h1,h2,h3,h4,h5,h6{font-family: "microsoft yahei";color: #333;}
+body{color: #555;}
+.row{margin-top: 20px;margin-bottom: 20px;}
+.row3{margin-top: 40px;}
+
+.media-heading{color: #3276B1;}
+.media-body{line-height: 24px;}
+.thumbnail+h4{text-align: center;font-size: 16px;color: #666;font-family: simsun;}
+.well{border-radius: 0;box-shadow: none;background-color: #FAFBFC;}
+.thumbnail{border-radius: 0;}
+blockquote p{font-family: "microsoft yahei";}
+.tpl-pic,.tpl-list{display: none;}

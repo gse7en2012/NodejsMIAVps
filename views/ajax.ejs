@@ -1,0 +1,69 @@
+<script src="https://rawgithub.com/timrwood/moment/2.2.1/min/moment.min.js"></script>
+<div class="panel panel-default">
+    <div class="panel-heading">访客<%= infoid%>访问过的页面：</div>
+    <div class="panel-body">
+        <% if(page.length>0){%>
+
+        <table class="table table-hover">
+            <thead><tr>
+                <th>序号</th>
+                <th>访问页面</th>
+                <th>页面标题</th>
+                <th>访问次数</th>
+                <th>访问来源</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% for(var i=0; i<page.length; i++) {%>
+            <tr>
+                <td><%= i+1 %></td>
+                <td><%= page[i]['page_url']%></td>
+                <td><%= page[i]['page_title']%></td>
+                <td><%= page[i]['count']%></td>
+                <td>
+                    <%= page[i]['referrer']%>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+        <% }%>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">访客<%= infoid%>访问的详细信息：</div>
+    <div class="panel-body">
+        <table class="table  table-hover">
+            <thead>
+            <tr>
+                <th style="width: 50px;">序号</th>
+                <th>访问页面</th>
+                <th style="width: 170px;">进入时间</th>
+                <th style="width: 100px;">停留时间</th>
+                <th style="width: 100px;">页面模板</th>
+                <th>访问路径</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% for(var i=0; i<result.length; i++) {%>
+            <tr>
+                <td><%= i+1%></td>
+                <td><%= result[i]['page_url']%></td>
+                <td><%= result[i]['time_format']%></td>
+                <td><%= (result[i]['time']-result[i]['create_time'])/1000 %>秒</td>
+                <td><%= result[i]['tpl'] %></td>
+                <td>
+                    <% result[i]['point'].split('|').forEach(function(item){ %>
+                    <span class="label label-default"><%= item.replace(/land/gi,'refresh') %></span><span
+                        class="glyphicon glyphicon-arrow-right"></span>
+                    <% }) %> <span class="label label-danger">等待中或会话过期</span>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
