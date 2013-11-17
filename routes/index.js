@@ -36,6 +36,8 @@ exports.clearCookies = function (req, res) {
     res.send(200)
 }
 
+
+//TODO 移除这些学习代码
 exports.testq2=function(req,res){
     var Q=require('q'),
         fs=require('fs');

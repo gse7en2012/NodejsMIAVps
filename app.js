@@ -50,6 +50,7 @@ if (cluster.isMaster) {
     app.get('/cc', routes.clearCookies);
     app.get('/show/:id', show.showDetails);
     app.get('/q',routes.testq);
+    app.get('/mongo',user.mongoInfo);
 
 
 
