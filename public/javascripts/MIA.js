@@ -35,7 +35,7 @@ MIA.namespace('MIA.config');
 MIA.config = {
     version: '0.0.1',
     author: 'Gseven',
-    server: '/info'
+    server: '/mongo'
 }
 /**
  * 声明util.resSize对象,返回屏幕分辨率

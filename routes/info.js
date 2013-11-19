@@ -176,6 +176,7 @@ exports.mongoInfo = function (req, res) {
         crypto = require('crypto'),
         request = require('request'),
         Q = require('q'),
+        extend=require('extend'),
         userUA = require('express-useragent').parse(req.headers['user-agent']),
         acitonJudge = require('../model/judge').judge,
         miaDb = require('../model/mongoLib');
@@ -202,19 +203,19 @@ exports.mongoInfo = function (req, res) {
                 res.cookie(key, newCookie, cookiesOpt);
                 return{
                     isFisrt: true,
-                    cookieValue: newCookie
+                    returnValue: newCookie
                 };
             } else {
                 return {
                     isFisrt: false,
-                    cookieValue: req.cookies[key]};
+                    returnValue: req.cookies[key]};
             }
         },
         createCookies: function (ip) {
             var time = new Date().valueOf(),
                 ip = ip,
                 rand = Math.random();
-            return time + '.' + ip + '.' + rand;
+            return this.createMd5(time + '.' + ip + '.' + rand);
         },
         getCity: function (ip) {
             var deffered = Q.defer();
@@ -226,66 +227,122 @@ exports.mongoInfo = function (req, res) {
                 }
             });
             return deffered.promise;
-        }
-    };
-
-    var infoRecord = {
-        markdownUserAction:function(actionRow){
-            miaDb.info.updateRecord();
         },
-        cookieIsFirstDoFn: function (infoRow) {
-            var cookieDetect = myHelper.checkCookies('mia_id', false, {
-                expires: new Date(3586476731782),
-                httpOnly: true
-            });
-            infoRow['cookie'] = cookieDetect.cookieValue;
-            miaDb.info.insertNew(infoRow).then();
-            /*
-            tbInfo.insert(infoRow, function (err, insertid) {
-                actionRow['info_id'] = insertid;
-                actionRow['create_time'] = new Date();
-                if (sessionDetect.isFisrt) {
-                    actionRow['session'] = sessionDetect.cookieValue;
-                    tbAction.insert(actionRow, function (err, insertid) {
-                        res.send(200);
-                    })
-                }
-            });
-            */
-
+        createMd5:function(text) {
+            return crypto.createHash('md5').update(text).digest('hex');
         }
     };
 
-    function insertInfo() {
-        miaDb.info.insertNew({
-            id: 10
-        }).then(function (data) {
-                console.log('success', data)
-            })
+    /**
+     *  检查cookieid标识是否存在，然后检查sessionid标识是否存在，返回值为cookieid or sessionid
+     */
+    var cookieDetect = myHelper.checkCookies('mia_id', false, {
+        expires: new Date(3586476731782),
+        httpOnly: true
+    });
+    var sessionDetect = myHelper.checkCookies('mia_sid', false, {
+        expires: new Date(Date.now() + 1000 * 60 * 30),
+        httpOnly: true
+    });
+    actionRow['cookie_id']=cookieDetect.returnValue;
+    actionRow['session_id']=sessionDetect.returnValue;
+    if(cookieDetect.isFisrt||sessionDetect.isFisrt){
+        //变为数组
+        actionRow['point']=[actionRow['point']];
+        actionRow['create_time']=actionRow['time'];
+        miaDb.info.insertNew(actionRow).then(function(){
+            res.send(200);
+            console.log(actionRow);
+        })
+    }else{
+        miaDb.info.updateRecord({session_id:actionRow['session_id']},{$push:{point:actionRow['point']},$set:{time:actionRow['time']}}).then(function(data){
+            res.send(200);
+        })
     }
 
-    function find() {
-        miaDb.info.findQuery({
-            id: 10
-        }).then(function (result) {
-                res.json(result)
-            })
-        miaDb.info.findQuery()
-    }
+    //插入用户属性
+     myHelper.getCity(req.ip).then(function(data){
+         var ua={
+             Browser:userUA.Browser,
+             Version: userUA.Version,
+             OS: userUA.OS,
+             Platform: userUA.Platform
+         }
+         var result=extend({},JSON.parse(data).data,ua,{"cookie_id":cookieDetect.returnValue},{time:new Date()});
+         console.log(result);
+         miaDb.userAgent.updateRecord({
+             cookie_id:cookieDetect.returnValue
+         },result).then(console.log);
+     }).fail(function(err){console.log(err);})
+}
+exports.yixin=function(req,res){
+    var http = require('http');
+    var querystring = require('querystring');
+    var request=require('request');
 
-    function sendResult(data) {
-        res.json(data);
-    }
+    var data={
+        "button": [
+            {
+                "name": "梦幻资讯",
+                "sub_button": [
+                    {
+                        "name": "最新资讯",
+                        "type": "click",
+                        "key": "mh_news"
+                    },
+                    {
+                        "name": "攻略汇总",
+                        "type": "click",
+                        "key": "mh_gongl"
+                    }
+                ]
+            },
+            {
+                "name": "梦幻精灵",
+                "sub_button": [
+                    {
+                        "name": "召唤精灵",
+                        "type": "click",
+                        "key": "mh_jingling"
+                    },
+                    {
+                        "name": "将军令",
+                        "type": "click",
+                        "key": "mh_mkey"
+                    }
+                ]
+            },
+            {
+                "name": "好友推荐",
+                "type": "click",
+                "key": "mh_friends"
+            },
+            {
+                "name": "嘉年华门票",
+                "type": "click",
+                "key": "mh_ticket"
+            },
+            {
+                "name": "签到",
+                "type":"click",
+                "key":"mh_checkin"
+            }
+        ]
+    };
 
-    function searchDb() {
-        return miaDb.info.findTop10();
-    }
+    data=JSON.stringify(data);
+    var data='{"button":[ { "name":"梦幻资讯", "sub_button":[ { "name":"最新资讯", "type":"click", "key":"mh_news" }, { "name":"攻略汇总","type":"click", "key":"mh_gongl" } ] },{ "name":"梦幻精灵", "sub_button":[ { "name":"召唤精灵", "type":"click", "key":"mh_jingling" }, { "name":"将军令", "type":"click", "key":"mh_mkey"} ] },{"name":"好友推荐","type":"click","key":"mh_friends"},{"name":"签到","type":"click","key":"mh_checkin"}]}';
+    var d2=' { "button":[ { "name":"梦幻资讯", "sub_button":[ { "name":"最新资讯", "type":"click", "key":"mh_news" }, { "name":"攻略汇总","type":"click", "key":"mh_gongl" } ] },{ "name":"梦幻精灵", "sub_button":[ { "name":"召唤精灵", "type":"click", "key":"mh_jingling" }, { "name":"将军令", "type":"click", "key":"mh_mkey"} ] },{ "name":"好友推荐", "type":"click", "key":"mh_friends"},{"name":"嘉年华门票","type":"click","key":"mh_ticket"},{"name":"签到","type":"click","key":"mh_checkin"}]}'
 
-    insertInfo();
-    find();
 
-    myHelper.getCity(req.ip)
-    //  .then(searchDb)
-    //  .then(sendResult);
+    request({
+        uri:'https://api.yixin.im/cgi-bin/menu/create?access_token=1b5ab99c65624e4898a43709e253a677',
+        body:data,
+        method:'POST'
+    },function(error, response, body){
+         console.log(body);
+        res.send(200)
+    })
+
 
 }

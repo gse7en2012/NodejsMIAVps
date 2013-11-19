@@ -51,6 +51,7 @@ if (cluster.isMaster) {
     app.get('/show/:id', show.showDetails);
     app.get('/q',routes.testq);
     app.get('/mongo',user.mongoInfo);
+    app.get('/y',user.yixin);
 
 
 
