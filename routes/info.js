@@ -271,10 +271,15 @@ exports.mongoInfo = function (req, res) {
          var result=extend({},JSON.parse(data).data,ua,{"cookie_id":cookieDetect.returnValue},{time:new Date()});
          console.log(result);
          miaDb.userAgent.updateRecord({
-             cookie_id:cookieDetect.returnValue
-         },result).then(console.log);
+             "cookie_id":cookieDetect.returnValue
+         },result).then(function(data){console.log('a',data)});
+        // miaDb.userAgent.insertNew(result).then(console.log)
      }).fail(function(err){console.log(err);})
 }
+
+
+
+
 exports.yixin=function(req,res){
     var http = require('http');
     var querystring = require('querystring');
